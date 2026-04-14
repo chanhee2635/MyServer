@@ -1,0 +1,27 @@
+# 빌드 결과물 (Binaries)
+*.exe
+*.dll
+*.lib
+*.pdb
+*.exp
+
+# 중간 빌드 파일 (Intermediates)
+*.obj
+*.ilk
+*.pch
+*.idb
+*.tlog
+*.lastbuildstate
+*.recipe
+*.iobj
+*.ipdb
+
+# 비주얼 스튜디오 설정 및 캐시
+.vs/
+*.user
+*.suo
+*.filters  
+*.vcxproj.user
+
+# 로그 및 기타
+*.log
