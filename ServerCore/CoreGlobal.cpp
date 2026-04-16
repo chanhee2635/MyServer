@@ -1,22 +1,22 @@
 #include "pch.h"
 #include "CoreGlobal.h"
+#include "ThreadManager.h"
+
+std::unique_ptr<ThreadManager> CoreGlobal::_threadManager = nullptr;
+ThreadManager* GThreadManager = nullptr;
 
 void CoreGlobal::Init()
 {
 	SocketUtils::Init();
 
-	//_threadManager = std::make_unique<ThreadManager>();
-	//GThreadManager = _threadManager.get();
-	//_threadManager->Init();
+	_threadManager = std::make_unique<ThreadManager>();
+	GThreadManager = _threadManager.get();
 }
 
 void CoreGlobal::Clear()
 {
-	//if(ThreadManager) GThreadManager->Clear();
-	//if(GMemory) GMemory->Clear();
-	//GThreadManager = nullptr;
-	//GMemory = nullptr;
-	//_threadManger = nullptr;
+	GThreadManager = nullptr;
+	_threadManager = nullptr;
 
 	SocketUtils::Clear();
 }

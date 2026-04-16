@@ -86,5 +86,7 @@ void Listener::ProcessAccept(AcceptEvent* acceptEvent)
 
 	//session->ProcessConnect();
 
+	std::cout << "Connect!" << std::endl;
+
 	RegisterAccept(acceptEvent);
 }

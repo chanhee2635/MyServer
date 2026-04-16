@@ -1,6 +1,6 @@
 #pragma once
 
-//extern class ThreadManager* GThreadManager;
+extern class ThreadManager* GThreadManager;
 
 class CoreGlobal
 {
@@ -9,6 +9,5 @@ public:
 	static void Clear();
 
 private:
-	//static std::unique_ptr<class ThreadManager> _threadManager;
+	static std::unique_ptr<class ThreadManager> _threadManager;
 };
-

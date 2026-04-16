@@ -3,6 +3,14 @@
 
 #include "IocpCore.h"
 #include "Listener.h"
+#include "ThreadManager.h"
+
+void Job() {
+	while (true)
+	{
+		GIocpCore.Dispatch(1);
+	}
+}
 
 int main()
 {
@@ -12,26 +20,15 @@ int main()
 	if (listener->StartAccept(NetAddress(L"127.0.0.1", 7777)) == false)
 		return 0;
 
-	std::cout << "Server Listening on 127.0.0.1:7777..." << std::endl;
-
-	std::vector<std::thread> workerThreads;
-
-	for (int32 i = 0; i < 4; i++)
+	int iocpThreadCount = std::thread::hardware_concurrency() - 5;
+	for (uint8 i = 0; i < iocpThreadCount; ++i)
 	{
-		workerThreads.emplace_back([=]()
-			{
-				while (true)
-				{
-					if (GIocpCore.Dispatch() == false)
-						break;
-				}
-			});
+		GThreadManager->Launch(ThreadType::IO, Job);
 	}
 
-	for (std::thread& t : workerThreads)
+	while (true)
 	{
-		if (t.joinable())
-			t.join();
+
 	}
 
 	CoreGlobal::Clear();
