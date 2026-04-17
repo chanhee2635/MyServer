@@ -14,7 +14,15 @@ void Job() {
 
 int main()
 {
-	CoreGlobal::Init();
+	SYSTEM_INFO info;
+	::GetSystemInfo(&info);
+
+	info.dwPageSize;
+	info.dwAllocationGranularity;
+
+	std::cout << std::endl;
+
+	/*CoreGlobal::Init();
 
 	std::shared_ptr<Listener> listener = std::make_shared<Listener>();
 	if (listener->StartAccept(NetAddress(L"127.0.0.1", 7777)) == false)
@@ -31,5 +39,7 @@ int main()
 
 	}
 
-	CoreGlobal::Clear();
+	std::shared_ptr<Session> session;
+	
+	CoreGlobal::Clear();*/
 }
