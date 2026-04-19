@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "Allocator.h"
 
-void* BaseAllocator::Allocate(int32 size)
+void* BaseAllocator::Allocate(uint32 size)
 {
-    return ::_aligned_malloc(size, 16);
+    return ::_aligned_malloc(size, AlignSize);
 }
 
 void BaseAllocator::Release(void* ptr)
@@ -17,12 +17,12 @@ const int32 StompAllocator::GPageSize = []() {
     return static_cast<int32>(info.dwPageSize);
 }();
 
-void* StompAllocator::Allocate(int32 size)
+void* StompAllocator::Allocate(uint32 size)
 {
-    const int32 alignedSize = (size + 15) & ~15;
+    const uint32 alignedSize = MemoryUtils::AlignUp(size, AlignSize);
 
-    const int32 dataPageCount = (alignedSize + GPageSize - 1) / GPageSize;
-    const int32 totalPageCount = dataPageCount + 1; 
+    const uint32 dataPageCount = (alignedSize + GPageSize - 1) / GPageSize;
+    const uint32 totalPageCount = dataPageCount + 1; 
 
     void* baseAddress = ::VirtualAlloc(NULL, static_cast<size_t>(totalPageCount * GPageSize), MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 
@@ -30,7 +30,7 @@ void* StompAllocator::Allocate(int32 size)
     DWORD oldProtect;
     ::VirtualProtect(guardPage, GPageSize, PAGE_NOACCESS, &oldProtect);
 
-    const int32 dataOffset = (dataPageCount * GPageSize) - alignedSize;
+    const uint32 dataOffset = (dataPageCount * GPageSize) - alignedSize;
     return static_cast<void*>(static_cast<int8*>(baseAddress) + dataOffset);
 }
 
@@ -43,9 +43,9 @@ void StompAllocator::Release(void* ptr)
     ::VirtualFree(reinterpret_cast<void*>(baseAddress), 0, MEM_RELEASE);
 }
 
-FrameAllocator::FrameAllocator(int32 bufferSize) : _bufferSize(bufferSize)
+FrameAllocator::FrameAllocator(uint32 bufferSize) : _bufferSize(bufferSize)
 {
-    _buffer = static_cast<uint8*>(::_aligned_malloc(bufferSize, 16));
+    _buffer = static_cast<uint8*>(::_aligned_malloc(bufferSize, AlignSize));
     _freePtr = _buffer;
     _endPtr = _buffer + bufferSize;
 }
@@ -59,9 +59,9 @@ FrameAllocator::~FrameAllocator()
     }
 }
 
-void* FrameAllocator::Allocate(int32 size)
+void* FrameAllocator::Allocate(uint32 size)
 {
-    const int32 alignedSize = (size + 15) & ~15;
+    const uint32 alignedSize = MemoryUtils::AlignUp(size, AlignSize);
 
     if (_freePtr + alignedSize > _endPtr)
     {

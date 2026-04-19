@@ -4,15 +4,18 @@ class IAllocator
 {
 public:
 	virtual ~IAllocator() {}
-	virtual void* Allocate(int32 size) = 0;
+	virtual void* Allocate(uint32 size) = 0;
 	virtual void  Release(void* ptr) = 0;
+
+protected:
+	static constexpr uint32 AlignSize = Config::Memory::DEFAULT_ALIGNMENT;
 };
 
 // Global, OverMaxSize 
 class BaseAllocator : public IAllocator
 {
 public:
-	virtual void* Allocate(int32 size) override;
+	virtual void* Allocate(uint32 size) override;
 	virtual void  Release(void* ptr) override;
 };
 
@@ -20,26 +23,28 @@ public:
 class FrameAllocator : public IAllocator
 {
 public:
-	FrameAllocator(int32 bufferSize = 10 * 1024 * 1024);
+	FrameAllocator(uint32 bufferSize = BufferSize);
 	virtual ~FrameAllocator() override;
 
-	virtual void* Allocate(int32 size) override;
+	virtual void* Allocate(uint32 size) override;
 	virtual void  Release(void* ptr) override;
 
 	void Clear();
 
 private:
-	uint8* _buffer = nullptr;
-	uint8* _freePtr = nullptr;
-	uint8* _endPtr = nullptr;
-	int32  _bufferSize = 0;
+	uint8*  _buffer		= nullptr;
+	uint8*  _freePtr	= nullptr;
+	uint8*  _endPtr		= nullptr;
+	uint32  _bufferSize = 0;
+
+	static constexpr uint32 BufferSize = Config::Memory::Frame::DEFAULT_BUFFER_SIZE;
 };
 
 // Use-after-free, Buffer Overflow
 class StompAllocator : public IAllocator
 {
 public:
-	virtual void* Allocate(int32 size) override;
+	virtual void* Allocate(uint32 size) override;
 	virtual void  Release(void* ptr) override;
 
 private:

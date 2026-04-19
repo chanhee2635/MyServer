@@ -25,10 +25,6 @@ constexpr int16 len16(T(&arr)[N]) { return static_cast<int16>(N); }
 template<typename T, size_t N>
 constexpr int32 len32(T(&arr)[N]) { return static_cast<int32>(N); }
 
-
-
-
-
-
 enum class AllocType { Pool, Frame };
 enum class ThreadType : uint8 { NONE, LOGIC, IO, DB };
+

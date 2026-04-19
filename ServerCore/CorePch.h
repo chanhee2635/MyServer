@@ -15,6 +15,8 @@
 #include <atomic>
 
 #include "Types.h"
+#include "Utils.h"
+#include "Config.h"
 #include "CoreMacro.h"
 #include "SocketUtils.h"
 #include "CoreGlobal.h"
