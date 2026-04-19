@@ -10,7 +10,6 @@
 #pragma comment(lib, "mswsock.lib")
 
 #include <iostream>
-#include <vector>
 #include <string>
 #include <mutex>
 #include <atomic>
@@ -19,3 +18,4 @@
 #include "CoreMacro.h"
 #include "SocketUtils.h"
 #include "CoreGlobal.h"
+#include "Container.h"
