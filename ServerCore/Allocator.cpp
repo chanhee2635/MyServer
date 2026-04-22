@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Allocator.h"
+#include "Memory.h"
 
 void* BaseAllocator::Allocate(uint32 size)
 {
@@ -20,7 +21,6 @@ const int32 StompAllocator::GPageSize = []() {
 void* StompAllocator::Allocate(uint32 size)
 {
     const uint32 alignedSize = MemoryUtils::AlignUp(size, AlignSize);
-
     const uint32 dataPageCount = (alignedSize + GPageSize - 1) / GPageSize;
     const uint32 totalPageCount = dataPageCount + 1; 
 
@@ -38,8 +38,8 @@ void StompAllocator::Release(void* ptr)
 {
     if (ptr == nullptr) return;
 
-    const int64 address = reinterpret_cast<int64>(ptr);
-    const int64 baseAddress = address - (address % GPageSize);
+    const uintptr address = reinterpret_cast<uintptr>(ptr);
+    const uintptr baseAddress = address - (address % GPageSize);
     ::VirtualFree(reinterpret_cast<void*>(baseAddress), 0, MEM_RELEASE);
 }
 
@@ -65,14 +65,13 @@ void* FrameAllocator::Allocate(uint32 size)
 
     if (_freePtr + alignedSize > _endPtr)
     {
-        // Size up Or Base Allocator
+        // TODO: Size up Or Base Allocator
         std::cout << "Frame Overflow! Size: " << size << " Falling back to Base." << std::endl;
         ASSERT_CRASH(false);
     }
 
     void* ptr = _freePtr;
     _freePtr += alignedSize;
-
     return ptr;
 }
 
@@ -83,4 +82,14 @@ void FrameAllocator::Release(void* ptr)
 void FrameAllocator::Clear()
 {
     _freePtr = _buffer;
+}
+
+void* PoolAllocator::Allocate(uint32 size)
+{
+    return GMemory->Allocate(size);
+}
+
+void PoolAllocator::Release(void* ptr)
+{
+    GMemory->Release(ptr);
 }

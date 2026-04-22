@@ -2,8 +2,6 @@
 #include "IocpCore.h"
 #include "IocpEvent.h"
 
-IocpCore GIocpCore;
-
 IocpCore::IocpCore()
 {
 	_iocpHandle = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
@@ -18,13 +16,13 @@ IocpCore::~IocpCore()
 
 bool IocpCore::Register(IocpObjectRef iocpObject)
 {
-	return ::CreateIoCompletionPort(iocpObject->GetHandle(), _iocpHandle, reinterpret_cast<ULONG_PTR>(iocpObject.get()), 0);
+	return ::CreateIoCompletionPort(iocpObject->GetHandle(), _iocpHandle, reinterpret_cast<ULONG_PTR>(iocpObject.get()), 0) != NULL;
 }
 
 bool IocpCore::Dispatch(uint32 timeoutMs)
 {
 	DWORD       numOfBytes = 0;
-	IocpObject* iocpObject = nullptr;  // 개선: 키를 사용하여 shared_ptr을 사용하지 않고 바로 접근 
+	IocpObject* iocpObject = nullptr;
 	OVERLAPPED* overlapped = nullptr;
 
     if (::GetQueuedCompletionStatus(_iocpHandle, OUT &numOfBytes, OUT reinterpret_cast<PULONG_PTR>(&iocpObject), OUT &overlapped, timeoutMs))
@@ -46,8 +44,6 @@ void IocpCore::ProcessEvent(IocpObject* obj, IocpEvent* event, int32 bytes)
 {
     ASSERT_CRASH(obj != nullptr);
     ASSERT_CRASH(event != nullptr);
-
     obj->Dispatch(event, bytes);
-    event->owner = nullptr;
 }
 

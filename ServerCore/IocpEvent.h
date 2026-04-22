@@ -7,10 +7,12 @@ public:
 	IocpEvent(IocpEventType type);
 
 	void		  Init();
-	IocpEventType GetType() { return eventType; }
 
-public:
-	IocpEventType eventType;
-	IocpObjectRef owner;
+	IocpEventType GetType() const { return _eventType; }
+	IocpObjectRef GetOwner() const { return _owner; }
+	void		  SetOwner(IocpObjectRef owner) { _owner = owner; }
+
+private:
+	IocpEventType _eventType;
+	IocpObjectRef _owner;
 };
-

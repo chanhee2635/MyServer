@@ -13,6 +13,9 @@
 #include <string>
 #include <mutex>
 #include <atomic>
+#include <thread>       
+#include <functional>   
+#include <span>         
 
 #include "Types.h"
 #include "Utils.h"
@@ -20,4 +23,7 @@
 #include "CoreMacro.h"
 #include "SocketUtils.h"
 #include "CoreGlobal.h"
+#include "CoreTLS.h"
+#include "Memory.h"
 #include "Container.h"
+#include "SendBuffer.h"

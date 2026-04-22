@@ -13,9 +13,10 @@ NetAddress::NetAddress(wstring ip, uint16 port)
 	_address.sin_port = ::htons(port);
 }
 
-wstring NetAddress::GetIpAddress()
+wstring NetAddress::GetIpAddress() const
 {
-	WCHAR buffer[100];
+	static constexpr int32 IP_BUFFER_SIZE = 46;  
+	WCHAR buffer[IP_BUFFER_SIZE];
 	::InetNtopW(AF_INET, &_address.sin_addr, buffer, len32(buffer));
 	return wstring(buffer);
 }

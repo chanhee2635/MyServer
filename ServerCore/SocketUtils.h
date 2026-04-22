@@ -21,7 +21,7 @@ public:
 	static bool SetSendBufferSize(SOCKET socket, int32 size);
 	static bool SetUpdateAcceptSocket(SOCKET socket, SOCKET listenSocket);
 
-	static bool Bind(SOCKET socket, NetAddress netAddr);
+	static bool Bind(SOCKET socket, const NetAddress& netAddr);
 	static bool BindAnyAddress(SOCKET socket, uint16 port);
 	static bool Listen(SOCKET socket, int32 backlog = SOMAXCONN);
 	static void Close(SOCKET& socket);

@@ -11,16 +11,13 @@ void SocketUtils::Init()
 	ASSERT_CRASH(::WSAStartup(MAKEWORD(2, 2), OUT & wsaData) == 0);
 
 	SOCKET dummySocket = CreateSocket();
-	ASSERT_CRASH(BindWindowsFunction(dummySocket, WSAID_ACCEPTEX, AcceptEx));
-	ASSERT_CRASH(BindWindowsFunction(dummySocket, WSAID_CONNECTEX, ConnectEx));
-	ASSERT_CRASH(BindWindowsFunction(dummySocket, WSAID_DISCONNECTEX, DisconnectEx));
-
-	int32 sendBufSize;
-	int32 len = sizeof(sendBufSize);
-	::getsockopt(dummySocket, SOL_SOCKET, SO_SNDBUF, reinterpret_cast<char*>(&sendBufSize), &len);
-	std::cout << "Default Send Buffer: " << sendBufSize << std::endl;
+	ASSERT_CRASH(dummySocket != INVALID_SOCKET);
+	bool success = BindWindowsFunction(dummySocket, WSAID_ACCEPTEX, AcceptEx)
+		&& BindWindowsFunction(dummySocket, WSAID_CONNECTEX, ConnectEx)
+		&& BindWindowsFunction(dummySocket, WSAID_DISCONNECTEX, DisconnectEx);
 
 	Close(dummySocket);
+	ASSERT_CRASH(success);
 }
 
 void SocketUtils::Clear()
@@ -43,7 +40,7 @@ bool SocketUtils::SetLinger(SOCKET socket, uint16 onoff, uint16 linger)
 
 bool SocketUtils::SetTcpNoDelay(SOCKET socket, bool flag)
 {
-	return SetSockOpt(socket, SOL_SOCKET, TCP_NODELAY, flag);
+	return SetSockOpt(socket, IPPROTO_TCP, TCP_NODELAY, flag);
 }
 
 bool SocketUtils::SetReuseAddress(SOCKET socket, bool flag)
@@ -66,7 +63,7 @@ bool SocketUtils::SetUpdateAcceptSocket(SOCKET socket, SOCKET listenSocket)
 	return SetSockOpt(socket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, listenSocket);
 }
 
-bool SocketUtils::Bind(SOCKET socket, NetAddress netAddr)
+bool SocketUtils::Bind(SOCKET socket, const NetAddress& netAddr)
 {
 	return ::bind(socket, reinterpret_cast<const SOCKADDR*>(&netAddr.GetSockAddr()), sizeof(sockaddr_in)) != SOCKET_ERROR;
 }
@@ -89,7 +86,7 @@ bool SocketUtils::Listen(SOCKET socket, int32 backlog)
 
 void SocketUtils::Close(SOCKET& socket)
 {
-	if (socket != INVALID_SOCKET)
+	if (socket == INVALID_SOCKET)
 		return;
 
 	::closesocket(socket);

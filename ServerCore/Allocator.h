@@ -1,53 +1,54 @@
 #pragma once
-// Policy
-class IAllocator
+
+// Global, OverMaxSize 
+class BaseAllocator 
 {
 public:
-	virtual ~IAllocator() {}
-	virtual void* Allocate(uint32 size) = 0;
-	virtual void  Release(void* ptr) = 0;
+	static void* Allocate(uint32 size);
+	static void  Release(void* ptr);
 
-protected:
+private:
 	static constexpr uint32 AlignSize = Config::Memory::DEFAULT_ALIGNMENT;
 };
 
-// Global, OverMaxSize 
-class BaseAllocator : public IAllocator
-{
-public:
-	virtual void* Allocate(uint32 size) override;
-	virtual void  Release(void* ptr) override;
-};
-
 // Temporary(TLS)
-class FrameAllocator : public IAllocator
+class FrameAllocator 
 {
 public:
 	FrameAllocator(uint32 bufferSize = BufferSize);
-	virtual ~FrameAllocator() override;
+	~FrameAllocator();
 
-	virtual void* Allocate(uint32 size) override;
-	virtual void  Release(void* ptr) override;
+	void* Allocate(uint32 size);
+	void  Release(void* ptr);
 
 	void Clear();
 
 private:
+	static constexpr uint32 AlignSize = Config::Memory::DEFAULT_ALIGNMENT;
+	static constexpr uint32 BufferSize = Config::Memory::Frame::DEFAULT_BUFFER_SIZE;
+
 	uint8*  _buffer		= nullptr;
 	uint8*  _freePtr	= nullptr;
 	uint8*  _endPtr		= nullptr;
 	uint32  _bufferSize = 0;
+};
 
-	static constexpr uint32 BufferSize = Config::Memory::Frame::DEFAULT_BUFFER_SIZE;
+class PoolAllocator 
+{
+public:
+	static void* Allocate(uint32 size);
+	static void  Release(void* ptr);
 };
 
 // Use-after-free, Buffer Overflow
-class StompAllocator : public IAllocator
+class StompAllocator 
 {
 public:
-	virtual void* Allocate(uint32 size) override;
-	virtual void  Release(void* ptr) override;
+	static void* Allocate(uint32 size);
+	static void  Release(void* ptr);
 
 private:
+	static constexpr uint32 AlignSize = Config::Memory::DEFAULT_ALIGNMENT;
 	static const int32 GPageSize;
 };
 
@@ -56,22 +57,32 @@ class StlAllocator {
 public:
 	using value_type = T;
 
+	template<typename Other>
+	struct rebind {
+		using other = StlAllocator<Other, Type>;
+	};
+
 	StlAllocator() noexcept {}
 	template<typename Other> StlAllocator(const StlAllocator<Other, Type>&) noexcept {}
 
 	T* allocate(size_t count) {
 		const int32 size = static_cast<int32>(count * sizeof(T));
 
-		/*if constexpr (Type == AllocType::Frame)
-			return static_cast<T*>(GMemory.AllocateFrame(size));
+		if constexpr (Type == AllocType::Frame)
+			return static_cast<T*>(LFrameAllocator->Allocate(size));
+		else if constexpr (Type == AllocType::Stomp)
+			return static_cast<T*>(StompAllocator::Allocate(size));
 		else
-			return static_cast<T*>(GMemory.Allocate(size));*/
-
-		return nullptr;
+			return static_cast<T*>(PoolAllocator::Allocate(size));
 	}
 
 	void deallocate(T* ptr, size_t count)
 	{
-		xrelease(ptr);
+		if constexpr (Type == AllocType::Frame)
+			return; 
+		else if constexpr (Type == AllocType::Stomp)
+			StompAllocator::Release(ptr);
+		else
+			PoolAllocator::Release(ptr);
 	}
 };

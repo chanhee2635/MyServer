@@ -49,3 +49,17 @@ using HashSet = std::unordered_set< Key, Hasher, KeyEq, StlAllocator<Key>>;
 
 template<typename T>
 using FrameVector = std::vector<T, StlAllocator<T, AllocType::Frame>>;
+
+template<typename T>
+using FrameList = std::list<T, StlAllocator<T, AllocType::Frame>>;
+
+template<typename Key, typename Type, typename Pred = std::less<Key>>
+using FrameMap = std::map<Key, Type, Pred, StlAllocator<std::pair<const Key, Type>, AllocType::Frame>>;
+
+template<typename Key, typename Pred = std::less<Key>>
+using FrameSet = std::set<Key, Pred, StlAllocator<Key, AllocType::Frame>>;
+
+template<typename Key, typename Type, typename Hasher = std::hash<Key>, typename KeyEq = std::equal_to<Key>>
+using FrameHashMap = std::unordered_map<Key, Type, Hasher, KeyEq, StlAllocator<std::pair<const Key, Type>, AllocType::Frame>>;
+
+using FrameString = std::basic_string<wchar_t, std::char_traits<wchar_t>, StlAllocator<wchar_t, AllocType::Frame>>;

@@ -14,14 +14,14 @@ public:
 private:
 	std::vector<std::thread> _threads;
 	std::mutex _lock;
-	std::atomic<int> _threadIdCounter = 0; 
+	std::atomic<int32> _threadIdCounter = 0; 
 };
 
 template<typename T, typename... Args>
 void ThreadManager::Launch(ThreadType type, T&& callback, Args&&... args)
 {
     std::lock_guard<std::mutex> guard(_lock);
-	int nextId = ++_threadIdCounter;
+	int32 nextId = ++_threadIdCounter;
 
     _threads.push_back(std::thread([type, nextId, cb = std::forward<T>(callback),...args = std::forward<Args>(args)]() mutable
         {
