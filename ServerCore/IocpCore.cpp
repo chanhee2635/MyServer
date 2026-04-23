@@ -44,6 +44,15 @@ void IocpCore::ProcessEvent(IocpObject* obj, IocpEvent* event, int32 bytes)
 {
     ASSERT_CRASH(obj != nullptr);
     ASSERT_CRASH(event != nullptr);
+
+    auto start = std::chrono::high_resolution_clock::now();
+
     obj->Dispatch(event, bytes);
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+
+    ServerStats::Get().iocp.iocpCallCount.fetch_add(1, std::memory_order_relaxed);
+    ServerStats::Get().iocp.totalProcessTimeUs.fetch_add(us, std::memory_order_relaxed);
 }
 

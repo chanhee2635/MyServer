@@ -40,6 +40,8 @@ MemoryHeader* MemoryPool::Pop()
 
 MemoryHeader* MemoryPool::AllocBatch()
 {
+    ServerStats::Get().memory.allocBatchCount.fetch_add(1, std::memory_order_relaxed);
+
     for (int32 i = 0; i < AllocCount - 1; ++i)
     {
         MemoryHeader* header = static_cast<MemoryHeader*>(::_aligned_malloc(_allocSize, AlignSize));
@@ -84,12 +86,14 @@ void TlsMemoryPool::Push(MemoryHeader* header)
 
 void TlsMemoryPool::FetchFromGlobal()
 {
+    ServerStats::Get().memory.fetchFromGlobalCount.fetch_add(1, std::memory_order_relaxed);
     for (int32 i = 0; i < BatchCount; ++i)
         PushLocal(_globalPool->Pop());
 }
 
 void TlsMemoryPool::ReturnToGlobal()
 {
+    ServerStats::Get().memory.returnToGlobalCount.fetch_add(1, std::memory_order_relaxed);
     while (_count > BatchCount)
         _globalPool->Push(PopLocal());
 }

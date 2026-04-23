@@ -45,12 +45,22 @@ void* MemoryManager::Allocate(uint32 size)
     const int32 allocSize = size + sizeof(MemoryHeader);
 
     if (allocSize > MAX_POOL_SIZE)
+    {
+        ServerStats::Get().memory.poolMissCount.fetch_add(1, std::memory_order_relaxed);
         header = reinterpret_cast<MemoryHeader*>(BaseAllocator::Allocate(allocSize));
+    }
     else if (LThreadMemory != nullptr) [[likely]]
+    {
+        ServerStats::Get().memory.poolHitCount.fetch_add(1, std::memory_order_relaxed);
         header = LThreadMemory->Allocate(allocSize);
+    }
     else
+    {
+        ServerStats::Get().memory.poolHitCount.fetch_add(1, std::memory_order_relaxed);
         header = _poolTable[allocSize]->Pop();
+    }
 
+    ServerStats::Get().memory.liveAllocCount.fetch_add(1, std::memory_order_relaxed);
     return MemoryHeader::AttachHeader(header, allocSize);
 #endif
 }
@@ -62,6 +72,7 @@ void MemoryManager::Release(void* ptr)
 #ifdef _STOMP
     StompAllocator::Release(ptr);
 #else
+    ServerStats::Get().memory.liveAllocCount.fetch_sub(1, std::memory_order_relaxed);
     MemoryHeader* header = MemoryHeader::DetachHeader(ptr);
     const int32 allocSize = header->GetAllocSize();
 

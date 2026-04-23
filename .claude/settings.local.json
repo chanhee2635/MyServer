@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.notion.so)",
+      "WebFetch(domain:tangy-pantry-d55.notion.site)",
+      "Read(//c/Users/chanhee/Downloads/**)",
+      "Bash(unzip -o \"107d5248-656a-4de9-8776-040c5a06d29c_ExportBlock-96e7fd5c-660d-4352-b8ce-78d1dadb2d94.zip\" -d notion_export)",
+      "Bash(unzip -o \"ExportBlock-96e7fd5c-660d-4352-b8ce-78d1dadb2d94-Part-1.zip\" -d notion_content)"
+    ]
+  }
+}

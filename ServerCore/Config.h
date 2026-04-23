@@ -29,6 +29,7 @@ namespace Config
 		static constexpr uint32 DEFAULT_ACCEPT_COUNT = 10;
 		static constexpr uint32 RECV_BUFFER_SIZE = 4 * KB;
 		static constexpr uint32 RECV_BUFFER_COUNT = 10;
+		static constexpr uint32 MAX_PACKET_SIZE = 4 * KB;
 	}
 
 	namespace Buffer

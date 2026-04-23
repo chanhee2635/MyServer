@@ -26,4 +26,5 @@
 #include "CoreTLS.h"
 #include "Memory.h"
 #include "Container.h"
+#include "ServerStats.h"
 #include "SendBuffer.h"

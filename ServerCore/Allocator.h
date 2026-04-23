@@ -65,6 +65,8 @@ public:
 	StlAllocator() noexcept {}
 	template<typename Other> StlAllocator(const StlAllocator<Other, Type>&) noexcept {}
 
+	bool operator==(const StlAllocator&) const noexcept { return true; }
+
 	T* allocate(size_t count) {
 		const int32 size = static_cast<int32>(count * sizeof(T));
 

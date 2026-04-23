@@ -21,6 +21,8 @@ using ServiceRef = std::shared_ptr<class Service>;
 using ServiceWeakRef = std::weak_ptr<class Service>;
 using SendBufferRef = std::shared_ptr<class SendBuffer>;
 using SendBufferChunkRef = std::shared_ptr<class SendBufferChunk>;
+using PacketSessionRef = std::shared_ptr<class PacketSession>;
+
 
 
 #define size16(val)		static_cast<int16>(sizeof(val))
@@ -31,5 +33,5 @@ template<typename T, size_t N>
 constexpr int32 len32(T(&arr)[N]) { return static_cast<int32>(N); }
 
 enum class AllocType { Frame, Stomp, Pool };
-enum class ThreadType : uint8 { NONE, LOGIC, IO, DB };
+enum class ThreadType : uint8 { NONE, LOGIC, IO, DB, MONITOR };
 
