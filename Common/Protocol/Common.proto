@@ -1,0 +1,8 @@
+syntax = "proto3";
+package Protocol;
+
+message PlayerInfo
+{
+    uint64 playerId = 1;
+    string username = 2;
+}

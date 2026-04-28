@@ -44,18 +44,18 @@ uint32 RecvBuffer::GetWriteSegments(WSABUF wsaBufs[2])
     }
     case BufferMode::Circular:
     {
-        uint32 tailSize = _capacity - _writePos; // writePos 부터 끝까지
+        uint32 tailSize = _capacity - _writePos; // contiguous space from writePos to end
 
         if (tailSize >= freeSize)
         {
-            // wrap 없이 끝까지 쓸 수 있음
+            // no wrap needed: single segment
             wsaBufs[0].buf = reinterpret_cast<char*>(_buffer.data() + _writePos);
             wsaBufs[0].len = static_cast<ULONG>(freeSize);
             return 1;
         }
         else
         {
-            // wrap: 끝까지 + 처음부터 남은 공간
+            // wrap: tail segment + head segment
             wsaBufs[0].buf = reinterpret_cast<char*>(_buffer.data() + _writePos);
             wsaBufs[0].len = static_cast<ULONG>(tailSize);
             wsaBufs[1].buf = reinterpret_cast<char*>(_buffer.data());
@@ -76,8 +76,8 @@ std::span<const BYTE> RecvBuffer::ReadSegment() const
 
     case BufferMode::Circular:
     {
-        // wrap 에 걸린 경우 끝까지만 반환 → 호출자가 Linearize() 후 재호출
-        uint32 tailSize = _capacity - _readPos;
+        // if data wraps around, return only contiguous portion; caller must Linearize() if needed
+        uint32 tailSize   = _capacity - _readPos;
         uint32 contiguous = (_dataSize < tailSize) ? _dataSize : tailSize;
         return { _buffer.data() + _readPos, contiguous };
     }
@@ -98,11 +98,11 @@ void RecvBuffer::Linearize()
     Vector<BYTE> temp(_dataSize);
     uint32 tailSize = _capacity - _readPos;
 
-    ::memcpy(temp.data(), _buffer.data() + _readPos, tailSize);
-    ::memcpy(temp.data() + tailSize, _buffer.data(), _dataSize - tailSize);
-    ::memcpy(_buffer.data(), temp.data(), _dataSize);
+    ::memcpy(temp.data(),           _buffer.data() + _readPos, tailSize);
+    ::memcpy(temp.data() + tailSize, _buffer.data(),            _dataSize - tailSize);
+    ::memcpy(_buffer.data(),         temp.data(),               _dataSize);
 
-    _readPos = 0;
+    _readPos  = 0;
     _writePos = _dataSize;
 }
 
@@ -117,7 +117,7 @@ bool RecvBuffer::OnWrite(uint32 numOfBytes)
         _writePos += numOfBytes;
         break;
     case BufferMode::Circular:
-        _writePos = (_writePos + numOfBytes) % _capacity;
+        _writePos  = (_writePos + numOfBytes) % _capacity;
         _dataSize += numOfBytes;
         break;
     }
@@ -136,9 +136,9 @@ bool RecvBuffer::OnRead(uint32 numOfBytes)
         CleanLinear();
         break;
     case BufferMode::Circular:
-        _readPos = (_readPos + numOfBytes) % _capacity;
+        _readPos   = (_readPos + numOfBytes) % _capacity;
         _dataSize -= numOfBytes;
-        // 데이터 소진 시 위치 초기화 (locality 향상)
+        // reset positions when buffer is empty for better cache locality
         if (_dataSize == 0)
             _readPos = _writePos = 0;
         break;
@@ -160,7 +160,7 @@ void RecvBuffer::CleanLinear()
     {
         ServerStats::Get().recvBuffer.memmoveCount++;
         ::memmove(_buffer.data(), _buffer.data() + _readPos, dataSize);
-        _readPos = 0;
+        _readPos  = 0;
         _writePos = dataSize;
     }
 }

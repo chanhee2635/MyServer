@@ -8,7 +8,7 @@ int main()
     SOCKET sock = SocketUtils::CreateSocket();
 
     // 서버 연결
-    SOCKADDR_IN addr = NetAddress(L"127.0.0.1", 7777).GetSockAddr();
+    SOCKADDR_IN addr = NetAddress("127.0.0.1", 7777).GetSockAddr();
     ::connect(sock, reinterpret_cast<SOCKADDR*>(&addr), sizeof(addr));
 
     // PacketHeader + payload 전송

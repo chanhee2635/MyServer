@@ -1,0 +1,12 @@
+syntax = "proto3";
+package Protocol;
+
+enum LoginPacketType
+{
+    NONE    = 0;
+    C_LOGIN = 1000;
+    S_LOGIN = 1001;
+}
+
+message CLogin { string username = 1; string password = 2; }
+message SLogin { bool success = 1; string token = 2; }

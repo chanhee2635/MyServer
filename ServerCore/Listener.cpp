@@ -60,7 +60,7 @@ void Listener::RegisterAccept(AcceptEvent* acceptEvent)
 		const int32 errCode = ::WSAGetLastError();
 		if (errCode != WSA_IO_PENDING)
 		{
-			//session->HandleError(errCode);
+			LOG_ERROR("AcceptEx failed errCode=" + std::to_string(errCode));
 			RegisterAccept(acceptEvent);
 		}
 	}
@@ -72,6 +72,7 @@ void Listener::ProcessAccept(AcceptEvent* acceptEvent)
 
 	if (SocketUtils::SetUpdateAcceptSocket(session->GetSocket(), _listenSocket) == false)
 	{
+		LOG_WARN("SetUpdateAcceptSocket failed, retrying accept");
 		RegisterAccept(acceptEvent);
 		return;
 	}
@@ -86,6 +87,7 @@ void Listener::ProcessAccept(AcceptEvent* acceptEvent)
 
 	if (GIocpCore->Register(session) == false)
 	{
+		LOG_ERROR("IOCP Register failed for new session");
 		RegisterAccept(acceptEvent);
 		return;
 	}

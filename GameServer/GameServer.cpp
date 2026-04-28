@@ -5,11 +5,11 @@
 
 int main()
 {
-    CoreGlobal::Init();
+    GameGlobal::Init();
 
     // ServerService 설정
     auto service = MakeShared<ServerService>(
-        NetAddress(L"127.0.0.1", 7777),
+        NetAddress("127.0.0.1", 7777),
         []() { return MakeShared<GameSession>(); },
         100
     );
@@ -17,10 +17,14 @@ int main()
     ASSERT_CRASH(service->Start());
 
     // IOCP 워커 스레드
-    GThread->Launch(ThreadType::IO, []() {
-        while (true)
-            GIocpCore->Dispatch();
+    const uint32 ioThreadCount = std::max(1u, std::thread::hardware_concurrency());
+    for (uint32 i = 0; i < ioThreadCount; ++i)
+    {
+        GThread->Launch(ThreadType::IO, []() {
+            while (true)
+                GIocpCore->Dispatch();
         });
+    }
 
     // 모니터 스레드
     GThread->Launch(ThreadType::MONITOR, []() {
@@ -37,5 +41,5 @@ int main()
     while (true)
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    CoreGlobal::Clear();
+    GameGlobal::Clear();
 }

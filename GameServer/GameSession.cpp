@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "GameSession.h"
+#include "ClientPacketHandler.h"
+#include "GameRoom.h"
 
 void GameSession::OnConnected()
 {
@@ -7,12 +9,12 @@ void GameSession::OnConnected()
 
 void GameSession::OnDisconnected()
 {
+    GGameRoom->Leave(std::static_pointer_cast<GameSession>(shared_from_this()));
 }
 
 void GameSession::OnRecvPacket(std::span<const BYTE> packet, uint16 type)
 {
-    SendBufferRef sendBuffer = GSendBufferManager->Open(static_cast<uint32>(packet.size()));
-    std::ranges::copy(packet, sendBuffer->GetBuffer());
-    sendBuffer->Close(static_cast<uint32>(packet.size()));
-    Send(sendBuffer);
+    ClientPacketHandler::Handle(
+        std::static_pointer_cast<GameSession>(shared_from_this()),
+        packet, type);
 }

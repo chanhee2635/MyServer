@@ -100,6 +100,7 @@ void Session::RegisterRecv()
         int32 errCode = ::WSAGetLastError();
         if (errCode != WSA_IO_PENDING)
         {
+            LOG_ERROR("WSARecv failed errCode=" + std::to_string(errCode));
             _recvEvent.SetOwner(nullptr);
             Disconnect();
         }
@@ -118,10 +119,11 @@ void Session::ProcessRecv(int32 numOfBytes)
     }
 
     ServerStats::Get().network.recvBytes.fetch_add(numOfBytes, std::memory_order_relaxed);
-    ServerStats::Get().network.recvPackets.fetch_add(1, std::memory_order_relaxed);             
+    ServerStats::Get().network.recvBatchCount.fetch_add(1, std::memory_order_relaxed);
 
     if (!_recvBuffer.OnWrite(numOfBytes))
     {
+        LOG_WARN("RecvBuffer full addr=" + GetNetAddress().GetIpAddress());
         ServerStats::Get().recvBuffer.bufferFullCount++;
         Disconnect();
         return;
@@ -134,6 +136,7 @@ void Session::ProcessRecv(int32 numOfBytes)
 
         if (processLen < 0)
         {
+            LOG_WARN("Invalid packet addr=" + GetNetAddress().GetIpAddress());
             Disconnect();
             return;
         }
@@ -198,6 +201,7 @@ void Session::RegisterSend()
         int32 errCode = ::WSAGetLastError();
         if (errCode != WSA_IO_PENDING)
         {
+            LOG_ERROR("WSASend failed errCode=" + std::to_string(errCode));
             _sendEvent.SetOwner(nullptr);
             Disconnect();
         }
@@ -219,7 +223,6 @@ void Session::ProcessSend(int32 numOfBytes)
     ServerStats::Get().network.sendPackets.fetch_add(1, std::memory_order_relaxed);
 
     OnSend(numOfBytes);
-
 
     bool registerSend = false;
     {
@@ -251,6 +254,7 @@ int32 PacketSession::OnRecv(const BYTE* buffer, uint32 len)
             break;
 
         OnRecvPacket(data.first(header.size), header.type);
+        ServerStats::Get().network.recvPackets.fetch_add(1, std::memory_order_relaxed);
 
         data = data.subspan(header.size);
         processLen += header.size;

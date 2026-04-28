@@ -19,12 +19,14 @@ public:
     NetAddress GetAddress()             const { return _address; }
 
 protected:
-    std::mutex         _lock;
-    NetAddress         _address;
-    SessionFactory     _sessionFactory;
-    Set<SessionRef>    _sessions;
-    std::atomic<int32> _sessionCount = 0;
-    int32              _maxSessionCount = 0;
+    NetAddress          _address;
+    SessionFactory      _sessionFactory;
+
+private:
+    std::mutex          _lock;
+    HashSet<SessionRef> _sessions;
+    std::atomic<int32>  _sessionCount = 0;
+    int32               _maxSessionCount = 0;
 };
 
 class ServerService : public Service

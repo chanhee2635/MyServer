@@ -12,7 +12,7 @@ public:
 	void Join();
 
 private:
-	std::vector<std::thread> _threads;
+	Vector<std::thread> _threads;
 	std::mutex _lock;
 	std::atomic<int32> _threadIdCounter = 0; 
 };

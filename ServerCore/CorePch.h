@@ -1,5 +1,7 @@
 #pragma once
 
+#define NOMINMAX
+
 #include <winsock2.h>
 #include <mswsock.h>
 #include <ws2tcpip.h>
@@ -10,8 +12,10 @@
 #pragma comment(lib, "mswsock.lib")
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <mutex>
+#include <shared_mutex> 
 #include <atomic>
 #include <thread>       
 #include <functional>   
@@ -27,4 +31,5 @@
 #include "Memory.h"
 #include "Container.h"
 #include "ServerStats.h"
+#include "Logger.h" 
 #include "SendBuffer.h"

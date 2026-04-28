@@ -22,6 +22,7 @@ void ServerStats::Report()
         << "[Network]  recv=" << net.recvBytes.exchange(0) / 1024 << "KB/s"
         << "  send=" << net.sendBytes.exchange(0) / 1024 << "KB/s"
         << "  recvPkt=" << net.recvPackets.exchange(0) << "/s"
+        << "  recvBatch=" << net.recvBatchCount.exchange(0) << "/s"
         << "  sendPkt=" << net.sendPackets.exchange(0) << "/s\n"
 
         << "[RecvBuf]  memmove=" << rb.memmoveCount.exchange(0)
@@ -33,10 +34,10 @@ void ServerStats::Report()
 
         << "[Memory]"
         << "  hit=" << mem.poolHitCount.exchange(0)
-        << "  miss=" << mem.poolMissCount.exchange(0)       // 높으면 MAX_POOL_SIZE 늘리기 고려
-        << "  batch=" << mem.allocBatchCount.exchange(0)     // 높으면 AllocCount 늘리기 고려
-        << "  fetch=" << mem.fetchFromGlobalCount.exchange(0)// 높으면 TLS_MAX_COUNT 늘리기 고려
+        << "  miss=" << mem.poolMissCount.exchange(0)        
+        << "  batch=" << mem.allocBatchCount.exchange(0)     
+        << "  fetch=" << mem.fetchFromGlobalCount.exchange(0) 
         << "  return=" << mem.returnToGlobalCount.exchange(0)
-        << "  live=" << mem.liveAllocCount << "\n"           // 0 이어야 정상, 서버 종료 후 확인
+        << "  live=" << mem.liveAllocCount << "\n"            
         << "====================\n";
 }

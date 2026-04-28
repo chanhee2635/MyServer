@@ -1,0 +1,17 @@
+syntax = "proto3";
+package Protocol;
+import "Common.proto";
+
+enum GamePacketType
+{
+    NONE    = 0;
+    C_ENTER = 2000;
+    S_ENTER = 2001;
+    C_CHAT  = 2002;
+    S_CHAT  = 2003;
+}
+
+message CEnter { PlayerInfo player = 1; }
+message SEnter { bool success = 1; }
+message CChat  { string content = 1; }
+message SChat  { string username = 1; string content = 2; }

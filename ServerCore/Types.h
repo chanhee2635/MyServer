@@ -11,7 +11,6 @@ using uint32 = std::uint32_t;
 using uint64 = std::uint64_t;
 using intptr = std::intptr_t;
 using uintptr = std::uintptr_t;
-using wstring = std::wstring;
 using string = std::string;
 
 using IocpObjectRef = std::shared_ptr<class IocpObject>;
