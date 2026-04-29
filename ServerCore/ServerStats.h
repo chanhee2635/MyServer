@@ -59,5 +59,6 @@ public:
     MemoryStats     memory;
     JobStats        job;
 
+    void Init();    // 콘솔 Stats 패널 영역 예약 (서버 시작 시 1회 호출)
     void Report();
 };
