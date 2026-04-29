@@ -16,6 +16,11 @@ private:
 	public:
 		SendEvent() : IocpEvent(IocpEventType::Send) {}
 	};
+	class ConnectEvent : public IocpEvent
+	{
+	public:
+		ConnectEvent() : IocpEvent(IocpEventType::Connect) {}
+	};
 
 public:
 	Session();
@@ -32,6 +37,7 @@ public:
 	void Send(SendBufferRef sendBuffer);
 	void ProcessConnect();
 	void Disconnect();
+	void RegisterConnect(const NetAddress& address);
 
 	virtual HANDLE GetHandle() const override { return reinterpret_cast<HANDLE>(_socket); }
 	virtual void   Dispatch(IocpEvent* iocpEvent, int32 numOfBytes = 0) override;
@@ -53,10 +59,11 @@ private:
 	std::atomic<bool>	_connected = false;
 	ServiceWeakRef		_service;
 
-	RecvEvent  _recvEvent;
-	SendEvent  _sendEvent;
-	RecvBuffer _recvBuffer{ BufferMode::Circular };
+	RecvEvent	 _recvEvent;
+	SendEvent	 _sendEvent;
+	ConnectEvent _connectEvent;
 
+	RecvBuffer			  _recvBuffer{ BufferMode::Circular };
 	std::mutex            _sendLock;
 	Vector<SendBufferRef> _sendQueue;
 	Vector<SendBufferRef> _sendPendingList; 

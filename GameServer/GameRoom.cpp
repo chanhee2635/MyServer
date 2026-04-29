@@ -4,24 +4,39 @@
 
 void GameRoom::Enter(GameSessionRef session)
 {
-    WRITE_LOCK;
-    _sessions.insert(session);
+    Push([this, session]() {
+        _sessions.insert(session);
+    });
 }
 
 void GameRoom::Leave(GameSessionRef session)
 {
-    WRITE_LOCK;
-    _sessions.erase(session);
+    Push([this, session]() {
+        _sessions.erase(session);
+    });
 }
 
 void GameRoom::Broadcast(SendBufferRef sendBuffer)
 {
-    Vector<GameSessionRef> sessions;
-    {
-        READ_LOCK;
-        sessions.assign(_sessions.begin(), _sessions.end());
-    }
+    Push([this, sendBuffer]() {
+        _pendingBroadcasts.push_back(sendBuffer);
+    });
+}
 
-    for (auto& session : sessions)
-        session->Send(sendBuffer);
+void GameRoom::FlushBatch()
+{
+    Push([this]() {
+        if (!_pendingBroadcasts.empty())
+        {
+            for (auto& session : _sessions)
+                for (auto& buf : _pendingBroadcasts)
+                    session->Send(buf);
+
+            _pendingBroadcasts.clear();
+        }
+
+        GJobTimer->Reserve(100, shared_from_this(), [this]() {
+            FlushBatch();
+        });
+    });
 }

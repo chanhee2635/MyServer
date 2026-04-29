@@ -39,5 +39,10 @@ void ServerStats::Report()
         << "  fetch=" << mem.fetchFromGlobalCount.exchange(0) 
         << "  return=" << mem.returnToGlobalCount.exchange(0)
         << "  live=" << mem.liveAllocCount << "\n"            
+
+        << "[Job]      queued=" << job.jobsQueued.exchange(0)
+        << "/s  exec=" << job.jobsExecuted.exchange(0)
+        << "/s  slice=" << job.timeSlices.exchange(0)
+        << "/s  timer=" << job.timerFired.exchange(0) << "/s\n"
         << "====================\n";
 }

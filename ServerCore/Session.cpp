@@ -35,6 +35,8 @@ void Session::Send(SendBufferRef sendBuffer)
 
 void Session::ProcessConnect()
 {
+    ::setsockopt(_socket, SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT, nullptr, 0);
+
     _connected = true;
     ServerStats::Get().session.currentActive++;
     ServerStats::Get().session.totalConnected++;
@@ -61,6 +63,32 @@ void Session::Disconnect()
     SocketUtils::Close(_socket);
 }
 
+void Session::RegisterConnect(const NetAddress& address)
+{
+    _connectEvent.Init();
+    _connectEvent.SetOwner(shared_from_this());
+
+    if (!SocketUtils::BindAnyAddress(_socket, 0))
+    {
+        LOG_ERROR("RegisterConnect: BindAnyAddress failed");
+        return;
+    }
+
+    DWORD numBytes = 0;
+    SOCKADDR_IN serverAddr = address.GetSockAddr();
+    if (!SocketUtils::ConnectEx(_socket,
+        reinterpret_cast<SOCKADDR*>(&serverAddr), sizeof(serverAddr),
+        nullptr, 0, &numBytes, &_connectEvent))
+    {
+        int32 errCode = ::WSAGetLastError();
+        if (errCode != WSA_IO_PENDING)
+        {
+            LOG_ERROR("ConnectEx failed errCode=" + std::to_string(errCode));
+            _connectEvent.SetOwner(nullptr);
+        }
+    }
+}
+
 void Session::Dispatch(IocpEvent* iocpEvent, int32 numOfBytes)
 {
     switch (iocpEvent->GetType())
@@ -70,6 +98,10 @@ void Session::Dispatch(IocpEvent* iocpEvent, int32 numOfBytes)
         break;
     case IocpEventType::Send:
         ProcessSend(numOfBytes);
+        break;
+    case IocpEventType::Connect:
+        _connectEvent.SetOwner(nullptr);  
+        ProcessConnect(); 
         break;
     default:
         break;

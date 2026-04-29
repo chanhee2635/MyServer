@@ -33,3 +33,6 @@
 #include "ServerStats.h"
 #include "Logger.h" 
 #include "SendBuffer.h"
+#include "JobQueue.h"
+#include "GlobalQueue.h"
+#include "JobTimer.h"

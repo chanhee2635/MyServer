@@ -7,37 +7,39 @@ int main()
 {
     GameGlobal::Init();
 
-    // ServerService 설정
     auto service = MakeShared<ServerService>(
         NetAddress("127.0.0.1", 7777),
         []() { return MakeShared<GameSession>(); },
-        100
+        2000
     );
 
     ASSERT_CRASH(service->Start());
 
-    // IOCP 워커 스레드
-    const uint32 ioThreadCount = std::max(1u, std::thread::hardware_concurrency());
-    for (uint32 i = 0; i < ioThreadCount; ++i)
-    {
-        GThread->Launch(ThreadType::IO, []() {
-            while (true)
-                GIocpCore->Dispatch();
-        });
-    }
+    GThread->Launch(ThreadType::IO, []() { while (true) GIocpCore->Dispatch(100); });
+    GThread->Launch(ThreadType::IO, []() { while (true) GIocpCore->Dispatch(100); });
 
-    // 모니터 스레드
+    GThread->Launch(ThreadType::LOGIC, []() {
+        while (true)
+        {
+            GJobTimer->Distribute(JobTimer::Now());
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+    });
+
+    GThread->Launch(ThreadType::LOGIC, []() {
+        GGlobalQueue->Distribute();
+    });
+
     GThread->Launch(ThreadType::MONITOR, []() {
         ServerStats::Get().Report();
         while (true)
         {
             std::this_thread::sleep_for(std::chrono::seconds(1));
-            std::cout << "\033[7A";
+            std::cout << "\033[8A";
             ServerStats::Get().Report();
         }
         });
 
-    // 메인 스레드 대기
     while (true)
         std::this_thread::sleep_for(std::chrono::seconds(1));
 

@@ -1,13 +1,14 @@
 #pragma once
 
-class GameRoom
+class GameRoom : public JobQueue
 {
 public:
     void Enter(GameSessionRef session);
     void Leave(GameSessionRef session);
     void Broadcast(SendBufferRef sendBuffer);
+    void FlushBatch();
 
 private:
-    std::shared_mutex   _rwLock;
     HashSet<GameSessionRef> _sessions;
+    Vector<SendBufferRef> _pendingBroadcasts;
 };

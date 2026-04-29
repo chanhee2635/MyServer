@@ -6,7 +6,7 @@ thread_local uint32              LThreadId       = 0;
 thread_local FrameAllocator*     LFrameAllocator = nullptr;
 thread_local ThreadLocalMemory*  LThreadMemory   = nullptr;
 thread_local SendBufferChunkRef  LSendBufferChunk = nullptr;
-
+thread_local JobQueue*			 LCurrentJobQueue = nullptr;
 
 void CoreTLS::OnThreadStart(ThreadType type, uint32 id)
 {

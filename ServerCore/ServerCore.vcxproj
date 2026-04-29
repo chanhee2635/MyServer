@@ -162,9 +162,13 @@
     <ClInclude Include="CoreMacro.h" />
     <ClInclude Include="CorePch.h" />
     <ClInclude Include="CoreTLS.h" />
+    <ClInclude Include="GlobalQueue.h" />
     <ClInclude Include="IocpCore.h" />
     <ClInclude Include="IocpEvent.h" />
+    <ClInclude Include="JobQueue.h" />
+    <ClInclude Include="JobTimer.h" />
     <ClInclude Include="Listener.h" />
+    <ClInclude Include="Logger.h" />
     <ClInclude Include="Memory.h" />
     <ClInclude Include="MemoryPool.h" />
     <ClInclude Include="NetAddress.h" />
@@ -184,9 +188,13 @@
     <ClCompile Include="CoreGlobal.cpp" />
     <ClCompile Include="CorePch.cpp" />
     <ClCompile Include="CoreTLS.cpp" />
+    <ClCompile Include="GlobalQueue.cpp" />
     <ClCompile Include="IocpCore.cpp" />
     <ClCompile Include="IocpEvent.cpp" />
+    <ClCompile Include="JobQueue.cpp" />
+    <ClCompile Include="JobTimer.cpp" />
     <ClCompile Include="Listener.cpp" />
+    <ClCompile Include="Logger.cpp" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="MemoryPool.cpp" />
     <ClCompile Include="NetAddress.cpp" />

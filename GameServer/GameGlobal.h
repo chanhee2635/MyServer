@@ -9,5 +9,5 @@ public:
     static void Clear();
 
 private:
-    static std::unique_ptr<class GameRoom> _gameRoom;
+    static std::shared_ptr<class GameRoom> _gameRoom;
 };

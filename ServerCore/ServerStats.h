@@ -39,6 +39,14 @@ struct MemoryStats
     std::atomic<int64>  liveAllocCount = 0;
 };
 
+struct JobStats
+{
+    std::atomic<uint64> jobsQueued = 0; 
+    std::atomic<uint64> jobsExecuted = 0; 
+    std::atomic<uint64> timeSlices = 0; 
+    std::atomic<uint64> timerFired = 0; 
+};
+
 class ServerStats
 {
 public:
@@ -49,6 +57,7 @@ public:
     SessionStats    session;
     IocpStats       iocp;
     MemoryStats     memory;
+    JobStats        job;
 
     void Report();
 };

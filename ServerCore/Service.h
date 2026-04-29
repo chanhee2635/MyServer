@@ -18,6 +18,14 @@ public:
     int32      GetMaxSessionCount()     const { return _maxSessionCount; }
     NetAddress GetAddress()             const { return _address; }
 
+    template<typename Fn>
+    void ForEachSession(Fn&& fn)
+    {
+        std::lock_guard guard(_lock);
+        for (auto& session : _sessions)
+            fn(session);
+    }
+
 protected:
     NetAddress          _address;
     SessionFactory      _sessionFactory;
@@ -37,4 +45,14 @@ public:
 
 private:
     ListenerRef _listener;
+};
+
+class ClientService : public Service
+{
+public:
+    ClientService(NetAddress address, SessionFactory factory, int32 maxSessionCount);
+    virtual bool Start() override;
+
+private:
+    void Connect();
 };

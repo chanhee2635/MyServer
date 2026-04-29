@@ -156,6 +156,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ClientPacketHandler.cpp" />
+    <ClCompile Include="GameGlobal.cpp" />
+    <ClCompile Include="GameRoom.cpp" />
     <ClCompile Include="GameServer.cpp" />
     <ClCompile Include="GameSession.cpp" />
     <ClCompile Include="pch.cpp">
@@ -164,11 +166,16 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Protocol\ClientPacketHandler_Generated.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GameGlobal.h" />
+    <ClInclude Include="GameRoom.h" />
     <ClInclude Include="GameSession.h" />
+    <ClInclude Include="GameTypes.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Protocol\ClientPacketHandler.h" />
   </ItemGroup>
   <ItemGroup>

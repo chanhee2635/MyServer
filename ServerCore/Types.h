@@ -21,7 +21,8 @@ using ServiceWeakRef = std::weak_ptr<class Service>;
 using SendBufferRef = std::shared_ptr<class SendBuffer>;
 using SendBufferChunkRef = std::shared_ptr<class SendBufferChunk>;
 using PacketSessionRef = std::shared_ptr<class PacketSession>;
-
+using JobQueueRef = std::shared_ptr<class JobQueue>;
+using JobQueueWeakRef = std::weak_ptr<class JobQueue>;
 
 
 #define size16(val)		static_cast<int16>(sizeof(val))

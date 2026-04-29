@@ -48,7 +48,7 @@ void IocpCore::ProcessEvent(IocpObject* obj, IocpEvent* event, int32 bytes)
 #ifdef _DEBUG
     auto start = std::chrono::high_resolution_clock::now();
 #endif 
-
+    IocpObjectRef ref = event->GetOwner();
     obj->Dispatch(event, bytes);
 
 #ifdef _DEBUG

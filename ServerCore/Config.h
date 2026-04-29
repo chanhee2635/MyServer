@@ -26,7 +26,7 @@ namespace Config
 
 	namespace Session
 	{
-		static constexpr uint32 DEFAULT_ACCEPT_COUNT = 10;
+		static constexpr uint32 DEFAULT_ACCEPT_COUNT = 100;
 		static constexpr uint32 RECV_BUFFER_SIZE = 4 * KB;
 		static constexpr uint32 RECV_BUFFER_COUNT = 10;
 		static constexpr uint32 MAX_PACKET_SIZE = 4 * KB;
@@ -41,5 +41,10 @@ namespace Config
 	{
 		static constexpr uint32 ADDR_BUFFER_SIZE = 64;
 		static constexpr uint32 ADDR_BUFFER_ALIGNMENT = 16;
+	}
+
+	namespace Job
+	{
+		static constexpr uint32 MAX_WORK_TICK = 64; 
 	}
 }

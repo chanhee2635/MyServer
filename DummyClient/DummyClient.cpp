@@ -1,44 +1,33 @@
 ﻿#include "pch.h"
-#include "Session.h"
+#include "DummySession.h"
+#include "Service.h"
+#include "ThreadManager.h"
 
 int main()
 {
     CoreGlobal::Init();
 
-    SOCKET sock = SocketUtils::CreateSocket();
+    auto service = MakeShared<ClientService>(
+        NetAddress("127.0.0.1", 7777),
+        []() { return MakeShared<DummySession>(); },
+        2000
+    );
 
-    // 서버 연결
-    SOCKADDR_IN addr = NetAddress("127.0.0.1", 7777).GetSockAddr();
-    ::connect(sock, reinterpret_cast<SOCKADDR*>(&addr), sizeof(addr));
+    ASSERT_CRASH(service->Start());
 
-    // PacketHeader + payload 전송
-    struct TestPacket
-    {
-        PacketHeader header;
-        char         msg[32] = "Hello Server!";
-    };
+    GThread->Launch(ThreadType::IO, []() { while (true) GIocpCore->Dispatch(100); });
+    GThread->Launch(ThreadType::IO, []() { while (true) GIocpCore->Dispatch(100); });
 
-    TestPacket packet;
-    packet.header.size = sizeof(TestPacket);
-    packet.header.type = 1;
-
-    while (true)
-    {
-        ::send(sock, reinterpret_cast<char*>(&packet), sizeof(packet), 0);
-
-        // 에코 수신
-        char recvBuf[256] = {};
-        int32 recvLen = ::recv(sock, recvBuf, sizeof(recvBuf), 0);
-        if (recvLen > 0)
+    GThread->Launch(ThreadType::LOGIC, [&service]() {
+        while (true)
         {
-            PacketHeader* header = reinterpret_cast<PacketHeader*>(recvBuf);
-            std::cout << "Echo received — type: " << header->type
-                << "  size: " << header->size << "\n";
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            service->ForEachSession([](SessionRef s) {
+                std::static_pointer_cast<DummySession>(s)->SendChat();
+            });
         }
+    });
 
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-
+    GThread->Join();
     CoreGlobal::Clear();
-	
 }
