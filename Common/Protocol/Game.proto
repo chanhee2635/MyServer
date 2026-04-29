@@ -2,16 +2,169 @@ syntax = "proto3";
 package Protocol;
 import "Common.proto";
 
-enum GamePacketType
-{
-    NONE    = 0;
-    C_ENTER = 2000;
-    S_ENTER = 2001;
-    C_CHAT  = 2002;
-    S_CHAT  = 2003;
+enum GamePacketType {
+    NONE = 0;
+
+    // ── 입장 ──────────────────────── 2000번대
+    C_ENTER       = 2000;
+    S_ENTER       = 2001;
+    S_PLAYER_DATA = 2002;  // 로그인 시 전체 데이터 전송
+
+    // ── 퀘스트 ────────────────────── 2010번대
+    C_COMPLETE_QUEST = 2010;
+    S_QUEST_RESULT   = 2011;
+    S_DAILY_QUESTS   = 2012;
+
+    // ── 채팅 ──────────────────────── 2020번대
+    C_ROOM_CHAT      = 2020;
+    S_ROOM_CHAT      = 2021;
+    C_WHISPER        = 2022;
+    S_WHISPER        = 2023;
+    S_WHISPER_FAILED = 2024;
+
+    // ── 소셜 (초대/방문) ───────────── 3000번대
+    C_INVITE_FRIEND   = 3000;
+    S_INVITE_REQUEST  = 3001;
+    C_INVITE_RESPONSE = 3002;
+    S_INVITE_DECLINED = 3003;
+
+    C_VISIT_REQUEST   = 3010;
+    S_VISIT_REQUEST   = 3011;
+    C_VISIT_RESPONSE  = 3012;
+    S_VISIT_DECLINED  = 3013;
+
+    C_KICK_PLAYER   = 3020;
+    S_KICKED        = 3021;
+    S_PLAYER_ENTERED = 3022;
+    S_PLAYER_LEFT   = 3023;
+
+    C_GET_FRIEND_LIST = 3030;
+    S_FRIEND_LIST     = 3031;
+
+    // ── 미니게임 ──────────────────── 4000번대
+    C_START_MINIGAME    = 4000;
+    S_MINIGAME_READY    = 4001;
+    C_MINIGAME_RESULT   = 4002;
+    S_MINIGAME_REWARD   = 4003;
+    S_SCORE_UPDATE      = 4004;
+    S_MINIGAME_ROOM_RESULT = 4005;
 }
 
-message CEnter { PlayerInfo player = 1; }
-message SEnter { bool success = 1; }
-message CChat  { string content = 1; }
-message SChat  { string username = 1; string content = 2; }
+// ── 입장 ───────────────────────────────────────
+
+message CEnter {
+    PlayerInfo player = 1;
+}
+message SEnter {
+    bool   success      = 1;
+    string fail_reason  = 2;
+}
+
+// 로그인 성공 시 전체 데이터 한번에 전송
+message SPlayerData {
+    PlayerInfo          info        = 1;
+    PlayerStats         stats       = 2;
+    repeated RoomInfo   rooms       = 3;
+    repeated QuestInfo  daily_quests = 4;
+    repeated ItemInfo   inventory   = 5;
+    bool                tutorial_done = 6;
+    int32               tutorial_step = 7;
+}
+
+// ── 퀘스트 ─────────────────────────────────────
+
+message CCompleteQuest {
+    int32 quest_id = 1;
+}
+message SQuestResult {
+    bool   success    = 1;
+    int32  quest_id   = 2;
+    int32  exp_gained = 3;
+    int32  pts_gained = 4;
+    int32  stat_type  = 5;
+    int32  stat_value = 6;
+    bool   leveled_up = 7;
+    int32  new_level  = 8;
+}
+message SDailyQuests {
+    repeated QuestInfo quests = 1;
+}
+
+// ── 채팅 ───────────────────────────────────────
+
+message CRoomChat {
+    string message = 1;
+}
+message SRoomChat {
+    uint64 from_id   = 1;
+    string from_name = 2;
+    string message   = 3;
+}
+
+message CWhisper {
+    uint64 target_id = 1;
+    string message   = 2;
+}
+message SWhisper {
+    uint64 from_id   = 1;
+    string from_name = 2;
+    string message   = 3;
+}
+message SWhisperFailed {
+    int32 reason = 1;  // 0:오프라인 1:친구아님 2:차단됨
+}
+
+// ── 소셜 ───────────────────────────────────────
+
+message CInviteFriend   { uint64 target_id = 1; }
+message SInviteRequest  { uint64 from_id = 1; string from_name = 2; }
+message CInviteResponse { bool accept = 1; uint64 from_id = 2; }
+message SInviteDeclined { uint64 target_id = 1; }
+
+message CVisitRequest   { uint64 target_id = 1; }
+message SVisitRequest   { uint64 from_id = 1; string from_name = 2; }
+message CVisitResponse  { bool accept = 1; uint64 from_id = 2; }
+message SVisitDeclined  { uint64 target_id = 1; }
+
+message CKickPlayer     { uint64 target_id = 1; }
+message SKicked         { }
+message SPlayerEntered  { uint64 player_id = 1; string username = 2; }
+message SPlayerLeft     { uint64 player_id = 1; string username = 2; }
+
+message CGetFriendList  { }
+message SFriendList     { repeated FriendInfo friends = 1; }
+
+// ── 미니게임 ───────────────────────────────────
+
+message CStartMinigame {
+    int32 game_type = 1;  // 0:바닥청소 1:벌레잡기 2:설거지
+}
+message SMinigameReady {
+    int32 game_type    = 1;
+    int32 seed         = 2;
+    int32 duration_sec = 3;  // 0=제한없음(바닥청소)
+}
+
+message CMinigameResult {
+    int32 game_type     = 1;
+    int32 score         = 2;
+    int32 elapsed_ms    = 3;
+    int32 combo_max     = 4;
+    int32 success_count = 5;
+    float coverage      = 6;  // 바닥청소 커버리지 %
+}
+message SMinigameReward {
+    int32 exp_gained    = 1;
+    int32 pts_gained    = 2;
+    int32 stat_type     = 3;
+    int32 stat_value    = 4;
+    bool  quest_cleared = 5;
+}
+
+message SScoreUpdate {
+    repeated ScoreEntry scores     = 1;
+    int32               remain_sec = 2;
+}
+message SMinigameRoomResult {
+    repeated ResultEntry results = 1;
+}

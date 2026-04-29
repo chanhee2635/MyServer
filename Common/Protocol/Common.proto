@@ -1,8 +1,72 @@
 syntax = "proto3";
 package Protocol;
 
-message PlayerInfo
-{
-    uint64 playerId = 1;
-    string username = 2;
+// 플레이어 기본 정보
+message PlayerInfo {
+    uint64 player_id = 1;
+    string username  = 2;
+    int32  level     = 3;
+    int64  exp       = 4;
+    int32  points    = 5;
+}
+
+// 게임 스탯
+message PlayerStats {
+    int32 hygiene   = 1;  // 위생 지수
+    int32 toxicity  = 2;  // 독성 수치
+    int32 stability = 3;  // 안정감
+    int32 comfort   = 4;  // 쾌적도
+    int32 family_hp = 5;  // 가족 HP
+}
+
+// 방 정보
+message RoomInfo {
+    int32 room_type   = 1;  // 0:거실 1:안방 2:주방 3:화장실 4:드레스룸 5:추가방
+    bool  is_unlocked = 2;
+    int32 cleanliness = 3;
+}
+
+// 퀘스트 정보
+message QuestInfo {
+    int32  quest_id    = 1;
+    string name        = 2;
+    int32  category    = 3;
+    int32  room_type   = 4;
+    bool   is_done     = 5;
+    int32  minigame_type = 6;  // -1:없음 0:바닥청소 1:벌레잡기 2:설거지
+}
+
+// 아이템 정보
+message ItemInfo {
+    int32  item_id       = 1;
+    string name          = 2;
+    int32  item_type     = 3;
+    int32  upgrade_level = 4;
+}
+
+// 친구 정보
+message FriendInfo {
+    uint64 player_id = 1;
+    string username  = 2;
+    bool   is_online = 3;
+    int32  wins      = 4;  // 통산 전적
+    int32  losses    = 5;
+}
+
+// 미니게임 점수 항목
+message ScoreEntry {
+    uint64 player_id = 1;
+    string username  = 2;
+    int32  score     = 3;
+    int32  ranking   = 4;
+}
+
+// 경쟁 결과 항목
+message ResultEntry {
+    uint64 player_id     = 1;
+    string username      = 2;
+    int32  score         = 3;
+    int32  ranking       = 4;
+    int32  points_reward = 5;
+    int32  session_wins  = 6;
 }

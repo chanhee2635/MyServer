@@ -124,7 +124,7 @@ bool ${handlerName}::Handle($sessionRef session, std::span<const BYTE> packet, u
     {
 $switchCases
     default: 
-        LOG_WARN(\"Unknown packet type=\" + std::to_string(type));
+        LOG_WARN("Unknown packet type=" + std::to_string(type));
         return false;
     }
 }
